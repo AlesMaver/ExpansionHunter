@@ -578,6 +578,10 @@ void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
     list<GraphMapping> mappings = aligner.GetBestAlignment(read_ptr->Bases());
     ++num_reads_aligned;
 
+    if (mappings.empty()) {
+      continue;
+    }
+
     const GraphMapping canonical_mapping =
         mapping_classifier.GetCanonicalMapping(mappings);
 
@@ -684,10 +688,26 @@ void RunGenotyper(const Parameters &parameters, const RepeatSpec &repeat_spec,
   const double hap_depth = parameters.depth() / 2;
   const int max_num_units_in_read =
       (int)(std::ceil(parameters.read_len() / (double)unit_len));
+
+  spd::get("console")->warn("max_num_units_in_read: {}", max_num_units_in_read);
+  spd::get("console")->warn("prop_correct_molecules: {}",
+                            prop_correct_molecules);
+  spd::get("console")->warn("hap_depth: {}", hap_depth);
+  spd::get("console")->warn("parameters.read_len(): {}", parameters.read_len());
+
   GenotypeShortRepeat(max_num_units_in_read, prop_correct_molecules, hap_depth,
                       parameters.read_len(), haplotype_candidates,
                       flanking_size_counts, spanning_size_counts, genotype_type,
                       genotype);
+}
+
+string EncodeCounts(const map<int32_t, int32_t> &size_counts) {
+  string encoding;
+  for (const auto &size_count : size_counts) {
+    encoding += "(" + std::to_string(size_count.first) + ", " +
+                std::to_string(size_count.second) + ") ";
+  }
+  return encoding;
 }
 
 int main(int argc, char *argv[]) {
@@ -744,28 +764,36 @@ int main(int argc, char *argv[]) {
       vector<reads::ReadPtr> read_ptrs;
       read_pairs.GetReads(read_ptrs);
 
+      console->info("Constructing STR graph");
       GraphSharedPtr graph_ptr =
           MakeStrGraph(repeat_spec.left_flank, repeat_spec.units_shifts[0][0],
                        repeat_spec.right_flank);
 
+      console->info("Reorienting reads");
       const int32_t kmer_len = 14;
       ReorientReads(graph_ptr, kmer_len, read_ptrs);
+      console->info("Aligning reads to graph");
       AlignReadsToGraph(graph_ptr, kmer_len, read_ptrs);
+      console->info("Writing alignments to log file");
       OutputGraphAlignments(repeat_spec, read_ptrs, outputs.log());
 
+      console->info("Generating haplotype candidates");
       map<int32_t, int32_t> flanking_size_counts;
       map<int32_t, int32_t> spanning_size_counts;
 
       vector<RepeatAllele> haplotype_candidates = GenerateHaplotypeCandidates(
           read_ptrs, flanking_size_counts, spanning_size_counts);
 
+      console->info("Flanking counts: {}", EncodeCounts(flanking_size_counts));
+      console->info("Spanning counts: {}", EncodeCounts(spanning_size_counts));
+
       string candidates_encoding;
       for (const RepeatAllele &repeat_allele : haplotype_candidates) {
         candidates_encoding += std::to_string(repeat_allele.size_) + " ";
       }
-      spd::get("console")->info("Haplotype candidates: {}",
-                                candidates_encoding);
+      console->info("Haplotype candidates: {}", candidates_encoding);
 
+      console->info("Genotyping the repeat");
       RepeatGenotype genotype;
       RunGenotyper(parameters, repeat_spec, haplotype_candidates,
                    flanking_size_counts, spanning_size_counts, genotype_type,

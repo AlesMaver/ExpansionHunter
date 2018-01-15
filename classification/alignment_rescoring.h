@@ -19,25 +19,3 @@
 //
 
 #pragma once
-
-#include <list>
-#include <string>
-#include <vector>
-
-#include "graphs/path.h"
-
-/**
- * @brief Splits sequence into segments corresponding to the path
- *
- * @param path Any valid path
- * @param sequence A string having the same length as the path
- * @return Segments of the sequence corresponding to nodes spanned by the path
- */
-std::vector<std::string> SplitByPath(const GraphPath& path,
-                                     const std::string& sequence);
-
-std::list<GraphPath> ComputeRightEndings(const GraphPath& path,
-                                         int32_t dist_from_right_end);
-
-std::list<GraphPath> ComputeLeftEndings(const GraphPath& path,
-                                        int32_t dist_from_left_end);

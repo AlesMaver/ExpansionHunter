@@ -18,26 +18,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#pragma once
+#include "classification/alignment_rescoring.h"
 
-#include <list>
 #include <string>
-#include <vector>
 
+#include "gtest/gtest.h"
+
+#include "graphs/graph.h"
+#include "graphs/graph_builders.h"
 #include "graphs/path.h"
+//#include "graphs/graph_mapping.h"
+//#include "graphs/graph_mapping_operations.h"
 
-/**
- * @brief Splits sequence into segments corresponding to the path
- *
- * @param path Any valid path
- * @param sequence A string having the same length as the path
- * @return Segments of the sequence corresponding to nodes spanned by the path
- */
-std::vector<std::string> SplitByPath(const GraphPath& path,
-                                     const std::string& sequence);
+using std::string;
 
-std::list<GraphPath> ComputeRightEndings(const GraphPath& path,
-                                         int32_t dist_from_right_end);
+TEST(AlignmentRescoring, Test_Test) {
+  //                   FFRRFFF
+  // const string read = "ATCCCCT";
+  // GraphMapping mapping =
+  //    DecodeFromString(2, "0[2M]1[1M]1[1M]2[3M]", read, graph_ptr);
 
-std::list<GraphPath> ComputeLeftEndings(const GraphPath& path,
-                                        int32_t dist_from_left_end);
+  // RescoreRightEnd(mapping, 5)
+}

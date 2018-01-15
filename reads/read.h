@@ -78,7 +78,7 @@ struct GraphInfo {
     return *this;
   }
   std::unique_ptr<GraphMapping> canonical_mapping_ptr;
-  MappingType canonical_mapping_type = MappingType::kUnknown;
+  MappingType canonical_mapping_type = MappingType::kUnmapped;
   int32_t num_str_units_spanned = 0;
   bool operator==(const GraphInfo& other) const {
     if (canonical_mapping_type != other.canonical_mapping_type ||
@@ -144,8 +144,10 @@ class Read {
   }
 
   // Provide access to graph-specific information.
-  const GraphMapping& CanonicalMapping() const {
-    return *graph_info_.canonical_mapping_ptr;
+  const GraphMapping& CanonicalMapping() const;
+
+  bool HasCanonicalMapping() const {
+    return ((bool)graph_info_.canonical_mapping_ptr);
   }
 
   void SetCanonicalMapping(const GraphMapping& graph_mapping) {

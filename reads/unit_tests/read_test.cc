@@ -34,3 +34,8 @@ TEST(ReadInitialization, TypicalCoreInfo_CoreInfoAddedToRead) {
 TEST(ReadInitialization, BasesAndQualsOfUnequalLength_ExceptionThrown) {
   EXPECT_ANY_THROW(Read read("frag1", "ATT", "?"));
 }
+
+TEST(ReadInitialization, UnsertCanonicalMapping_ExceptionThrownOnAccess) {
+  Read read("frag1", "ATTC", "????");
+  ASSERT_ANY_THROW(read.CanonicalMapping());
+}
