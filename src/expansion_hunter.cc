@@ -594,16 +594,17 @@ void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
       continue;
     }
 
-    if (!CheckIfStartAndEndMapWell(canonical_mapping)) {
+    const MappingType mapping_type =
+        mapping_classifier.Classify(canonical_mapping);
+
+    if (mapping_type == MappingType::kSpansRepeat &&
+        !CheckIfStartAndEndMapWell(canonical_mapping)) {
       continue;
     }
 
     ++num_reads_passed_filter;
 
     read_ptr->SetCanonicalMapping(canonical_mapping);
-
-    const MappingType mapping_type =
-        mapping_classifier.Classify(canonical_mapping);
     read_ptr->SetCanonicalMappingType(mapping_type);
 
     const int32_t num_str_units_spanned =
