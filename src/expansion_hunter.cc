@@ -42,6 +42,7 @@
 
 #include "classification/alignment_summary.h"
 #include "classification/mapping_classifier.h"
+#include "classification/mapping_filters.h"
 #include "classification/overlap_quantification.h"
 #include "common/parameters.h"
 #include "common/ref_genome.h"
@@ -592,6 +593,11 @@ void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
     if (prop_matches <= 0.8) {
       continue;
     }
+
+    if (!CheckIfStartAndEndMapWell(canonical_mapping)) {
+      continue;
+    }
+
     ++num_reads_passed_filter;
 
     read_ptr->SetCanonicalMapping(canonical_mapping);

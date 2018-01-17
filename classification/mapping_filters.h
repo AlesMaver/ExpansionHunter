@@ -25,7 +25,7 @@
 #include "graphs/graph_mapping.h"
 
 bool CheckIfStartAndEndMapWell(GraphMapping mapping,
-                               int32_t num_bases_to_rescore,
+                               int32_t num_bases_to_rescore = 12,
                                const int32_t kHighMatchCount = 8,
                                const double kHighMatchProp = 0.8,
                                const double kLowMatchProp = 0.6);
