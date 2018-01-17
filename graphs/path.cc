@@ -295,7 +295,7 @@ GraphPath GraphPath::MoveStartBy(int32_t move_by) const {
   GraphPath extended_path(pimpl_->graph_ptr_, updated_first_node_pos,
                           pimpl_->nodes_, pimpl_->end_position_);
   if (!extended_path.IsValid()) {
-    throw std::logic_error("Cannot move " + Encode() + " by " +
+    throw std::logic_error("Cannot move start of " + Encode() + " by " +
                            to_string(move_by));
   }
   return extended_path;
@@ -306,7 +306,7 @@ GraphPath GraphPath::MoveEndBy(int32_t move_by) const {
   GraphPath extended_path(pimpl_->graph_ptr_, pimpl_->start_position_,
                           pimpl_->nodes_, extended_last_node_pos);
   if (!extended_path.IsValid()) {
-    throw std::logic_error("Cannot move " + Encode() + " by " +
+    throw std::logic_error("Cannot move end of " + Encode() + " by " +
                            to_string(move_by));
   }
   return extended_path;
@@ -454,7 +454,7 @@ GraphPath GraphPath::ShrinkEndBy(int32_t end_shrink_len) const {
   const int32_t node_len_left = pimpl_->end_position_;
 
   if (end_shrink_len <= node_len_left) {
-    return MoveStartBy(end_shrink_len);
+    return MoveEndBy(-end_shrink_len);
   }
   const GraphPath path_without_end_node = RemoveEndNode();
   const int32_t leftover_len = end_shrink_len - node_len_left - 1;

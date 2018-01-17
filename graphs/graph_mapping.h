@@ -63,6 +63,7 @@ class GraphMapping {
     return path_ == other.path_ && mappings_ == other.mappings_;
   }
   std::string GetCigarString() const;
+  const GraphPath& Path() const { return path_; }
 
   friend std::ostream& operator<<(std::ostream& os,
                                   const GraphMapping& graph_mapping);
