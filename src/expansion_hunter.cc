@@ -566,8 +566,35 @@ void ReorientReads(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
   }
 }
 
-void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
-                       vector<reads::ReadPtr> &read_ptrs) {
+void OutputAlignedRead(const RepeatSpec &repeat_spec, const reads::Read &read,
+                       std::ostream &out) {
+  const int32_t indentation_size = 2;
+  const string spacer(indentation_size, ' ');
+  out << spacer << "- name: " << read.FragmentId() << endl;
+  out << spacer << spacer << "type: " << read.CanonicalMappingType() << endl;
+  out << spacer << spacer
+      << "graph_cigar: " << read.CanonicalMapping().GetCigarString() << endl;
+  out << spacer << spacer << "alignment: |" << endl;
+  out << EncodeGraphMapping(read.CanonicalMapping(), 3 * indentation_size)
+      << endl;
+}
+
+void OutputGraphAlignments(const RepeatSpec &repeat_spec,
+                           const vector<reads::ReadPtr> &read_ptrs,
+                           std::ostream &out) {
+  out << repeat_spec.repeat_id << ":" << endl;
+
+  for (const reads::ReadPtr &read_ptr : read_ptrs) {
+    if (read_ptr->CanonicalMappingType() == MappingType::kUnmapped) {
+      continue;
+    }
+    OutputAlignedRead(repeat_spec, *read_ptr, out);
+  }
+}
+
+void AlignReadsToGraph(const RepeatSpec &repeat_spec,
+                       const GraphSharedPtr &graph_ptr, int32_t kmer_len,
+                       std::ostream &out, vector<reads::ReadPtr> &read_ptrs) {
   GaplessAligner aligner(graph_ptr, kmer_len);
   StrMappingClassifier mapping_classifier(0, 1, 2);
   int32_t str_unit_len = graph_ptr->NodeSeq(1).length();
@@ -599,6 +626,7 @@ void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
 
     if (mapping_type == MappingType::kSpansRepeat &&
         !CheckIfStartAndEndMapWell(canonical_mapping)) {
+      OutputAlignedRead(repeat_spec, *read_ptr, out);
       continue;
     }
 
@@ -614,29 +642,6 @@ void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
 
   spd::get("console")->info("{} out of {} reads passed filter",
                             num_reads_passed_filter, num_reads_aligned);
-}
-
-void OutputGraphAlignments(const RepeatSpec &repeat_spec,
-                           const vector<reads::ReadPtr> &read_ptrs,
-                           std::ostream &out) {
-  out << repeat_spec.repeat_id << ":" << endl;
-  const int32_t indentation_size = 2;
-  const string spacer(indentation_size, ' ');
-  for (const reads::ReadPtr &read_ptr : read_ptrs) {
-    if (read_ptr->CanonicalMappingType() == MappingType::kUnmapped) {
-      continue;
-    }
-    out << spacer << "- name: " << read_ptr->FragmentId() << endl;
-    out << spacer << spacer << "type: " << read_ptr->CanonicalMappingType()
-        << endl;
-    out << spacer << spacer
-        << "graph_cigar: " << read_ptr->CanonicalMapping().GetCigarString()
-        << endl;
-    out << spacer << spacer << "alignment: |" << endl;
-    out << EncodeGraphMapping(read_ptr->CanonicalMapping(),
-                              3 * indentation_size)
-        << endl;
-  }
 }
 
 int32_t ComputeFlankingHaplotypeCandidate(
@@ -780,7 +785,8 @@ int main(int argc, char *argv[]) {
       const int32_t kmer_len = 14;
       ReorientReads(graph_ptr, kmer_len, read_ptrs);
       console->info("Aligning reads to graph");
-      AlignReadsToGraph(graph_ptr, kmer_len, read_ptrs);
+      AlignReadsToGraph(repeat_spec, graph_ptr, kmer_len, outputs.log(),
+                        read_ptrs);
       console->info("Writing alignments to log file");
       OutputGraphAlignments(repeat_spec, read_ptrs, outputs.log());
 
