@@ -592,8 +592,7 @@ void OutputGraphAlignments(const RepeatSpec &repeat_spec,
   }
 }
 
-void AlignReadsToGraph(const RepeatSpec &repeat_spec,
-                       const GraphSharedPtr &graph_ptr, int32_t kmer_len,
+void AlignReadsToGraph(const GraphSharedPtr &graph_ptr, int32_t kmer_len,
                        std::ostream &out, vector<reads::ReadPtr> &read_ptrs) {
   GaplessAligner aligner(graph_ptr, kmer_len);
   StrMappingClassifier mapping_classifier(0, 1, 2);
@@ -626,7 +625,7 @@ void AlignReadsToGraph(const RepeatSpec &repeat_spec,
 
     if (mapping_type == MappingType::kSpansRepeat &&
         !CheckIfStartAndEndMapWell(canonical_mapping)) {
-      OutputAlignedRead(repeat_spec, *read_ptr, out);
+      out << EncodeGraphMapping(canonical_mapping);
       continue;
     }
 
@@ -785,8 +784,7 @@ int main(int argc, char *argv[]) {
       const int32_t kmer_len = 14;
       ReorientReads(graph_ptr, kmer_len, read_ptrs);
       console->info("Aligning reads to graph");
-      AlignReadsToGraph(repeat_spec, graph_ptr, kmer_len, outputs.log(),
-                        read_ptrs);
+      AlignReadsToGraph(graph_ptr, kmer_len, outputs.log(), read_ptrs);
       console->info("Writing alignments to log file");
       OutputGraphAlignments(repeat_spec, read_ptrs, outputs.log());
 
