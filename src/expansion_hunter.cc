@@ -820,6 +820,10 @@ int main(int argc, char *argv[]) {
         genotype_encoding += std::to_string(allele.size_);
       }
 
+      outputs.json() << parameters.sample_name() << "\t"
+                     << repeat_spec.repeat_id << "\t" << genotype_encoding
+                     << std::endl;
+
       console->info("{}\t{}\t{}", parameters.sample_name(),
                     repeat_spec.repeat_id, genotype_encoding);
     }
