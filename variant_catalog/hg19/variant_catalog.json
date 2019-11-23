@@ -274,7 +274,7 @@
     {
         "LocusId": "GLS",
         "LocusStructure": "(GGA)*",
-        "ReferenceRegion": "chr2:191745599-191745646 ",
+        "ReferenceRegion": "chr2:191745599-191745646",
         "VariantType": "Repeat"
     },
     {
